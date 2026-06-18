@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISYARA • Login Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- CDN Alternatif 1: jsDelivr -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.2/css/all.min.css">
+
+    <!-- CDN Alternatif 2: Bootstrap CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
+        body {
+            background: linear-gradient(135deg, #0a192f 0%, #0f4c81 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-card {
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(12px);
+            border-radius: 30px;
+            padding: 45px 40px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .login-card .logo {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 800;
+            color: #0f4c81;
+            margin-bottom: 8px;
+        }
+        .login-card .logo i { color: #1e88e5; margin-right: 8px; }
+        .login-card .sub {
+            text-align: center;
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+        }
+        .login-card label {
+            display: block;
+            font-weight: 500;
+            margin-top: 18px;
+            font-size: 0.9rem;
+        }
+        .login-card input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 16px;
+            font-size: 1rem;
+            margin-top: 6px;
+            transition: border 0.3s;
+            background: #f8faff;
+        }
+        .login-card input:focus {
+            border-color: #1e88e5;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(30,136,229,0.2);
+        }
+        .login-card .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: #00bfa5;
+            color: white;
+            font-weight: 700;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            margin-top: 28px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0,191,165,0.3);
+        }
+        .login-card .btn-login:hover {
+            background: #00a891;
+            transform: translateY(-2px);
+        }
+        .login-card .error-msg {
+            color: #d32f2f;
+            background: #ffebee;
+            padding: 10px 14px;
+            border-radius: 12px;
+            margin-top: 16px;
+            font-size: 0.9rem;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+        .login-card .error-msg.visible { display: flex; }
+        .login-card .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #1e88e5;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .login-card .back-link:hover { text-decoration: underline; }
+        .login-card .info-akun {
+            background: #e3f2fd;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: #0d47a1;
+        }
+        .login-card .info-akun strong { display: block; margin-bottom: 4px; }
+        @media (max-width: 480px) {
+            .login-card { padding: 30px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="logo">
+            <i class="fa-solid fa-hands-asl-interpreting"></i> ISYARA
+        </div>
+        <div class="sub">Dashboard Admin • Masuk sebagai petugas</div>
+
+        <form id="loginForm">
+            <label for="username"><i class="fa-regular fa-user"></i> Username</label>
+            <input type="text" id="username" placeholder="contoh: superadmin" required>
+
+            <label for="password"><i class="fa-regular fa-lock"></i> Password</label>
+            <input type="password" id="password" placeholder="••••••••" required>
+
+            <button type="submit" class="btn-login"><i class="fa-regular fa-right-to-bracket"></i> Masuk</button>
+        </form>
+
+        <div id="errorMsg" class="error-msg">
+            <i class="fa-regular fa-circle-exclamation"></i>
+            <span id="errorText">Username atau password salah.</span>
+        </div>
+
+        <a href="index.html" class="back-link"><i class="fa-regular fa-arrow-left"></i> Kembali ke Beranda</a>
+
+        <div class="info-akun">
+            <strong><i class="fa-regular fa-circle-info"></i> Akun bawaan untuk demo:</strong>
+            superadmin / admin123 &nbsp;|&nbsp; adm_dinkes / password123
+        </div>
+    </div>
+
+    <script src="state_manager.js"></script>
+    <script>
+        (function() {
+            const form = document.getElementById('loginForm');
+            const errorDiv = document.getElementById('errorMsg');
+            const errorText = document.getElementById('errorText');
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value.trim();
+
+                // Cari user menggunakan StateManager
+                const user = StateManager.getUser(username);
+                
+                if (!user || user.password !== password) {
+                    errorText.textContent = 'Username atau password salah.';
+                    errorDiv.classList.add('visible');
+                    return;
+                }
+
+                // Jika user nonaktif
+                if (user.status === 'Nonaktif') {
+                    errorText.textContent = 'Akun ini telah dinonaktifkan. Hubungi superadmin.';
+                    errorDiv.classList.add('visible');
+                    return;
+                }
+
+                // Login sukses
+                StateManager.setCurrentUser({
+                    username: user.username,
+                    role: user.role,
+                    instansi: user.instansi
+                });
+                
+                // Redirect ke dashboard
+                window.location.href = 'dashboard.html';
+            });
+
+            // Sembunyikan error saat mengetik
+            document.getElementById('username').addEventListener('input', function() {
+                errorDiv.classList.remove('visible');
+            });
+            document.getElementById('password').addEventListener('input', function() {
+                errorDiv.classList.remove('visible');
+            });
+        })();
+    </script>
+</body>
+</html>

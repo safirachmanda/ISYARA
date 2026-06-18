@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISYARA • Dashboard Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <<!-- CDN Alternatif 1: jsDelivr -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.2/css/all.min.css">
+
+    <!-- CDN Alternatif 2: Bootstrap CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        /* ===== GLOBAL ===== */
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
+        body { background:#f0f4f8; color:#112240; }
+
+        :root {
+            --primary-blue: #0f4c81;
+            --secondary-blue: #1e88e5;
+            --accent-green: #00bfa5;
+            --dark-bg: #0a192f;
+            --text-dark: #112240;
+            --text-light: #f8f9fa;
+            --glass-bg: rgba(255,255,255,0.85);
+            --glass-border: rgba(255,255,255,0.4);
+            --glass-shadow: 0 8px 32px 0 rgba(31,38,135,0.12);
+            --transition: all 0.3s cubic-bezier(0.25,0.8,0.25,1);
+            --card-radius: 22px;
+        }
+
+        .dashboard-wrap {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 20px 30px 60px;
+        }
+
+        .dash-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--card-radius);
+            padding: 14px 28px;
+            box-shadow: var(--glass-shadow);
+            margin-bottom: 30px;
+            gap: 12px;
+        }
+
+        .dash-header .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+        .dash-header .logo i { color: var(--secondary-blue); font-size: 1.8rem; }
+
+        .dash-header .right-group {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .dash-header select {
+            padding: 8px 16px;
+            border-radius: 30px;
+            border: 1px solid #ddd;
+            background: white;
+            font-weight: 500;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .notif-badge {
+            position: relative;
+            font-size: 1.5rem;
+            color: var(--primary-blue);
+            cursor: pointer;
+        }
+        .notif-badge .badge-count {
+            position: absolute;
+            top: -8px;
+            right: -10px;
+            background: #e53935;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(229,57,53,0.4);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+        .user-info .avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--secondary-blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .qa-toggle {
+            color: rgba(0,0,0,0.2);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+            background: none;
+            border: none;
+            padding: 4px 8px;
+        }
+        .qa-toggle:hover { color: var(--primary-blue); }
+
+        .qa-panel {
+            background: #fff8e1;
+            border: 1px solid #ffd54f;
+            border-radius: 16px;
+            padding: 20px 25px;
+            margin-bottom: 25px;
+            display: none;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 12px rgba(255,213,79,0.25);
+        }
+        .qa-panel.visible { display: flex; }
+        .qa-panel button {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .qa-panel button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(15,76,129,0.3); }
+        .qa-panel .danger-btn { background: #d32f2f; }
+        .qa-panel .danger-btn:hover { box-shadow: 0 6px 16px rgba(211,47,47,0.35); }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 25px;
+            background: white;
+            padding: 6px 10px;
+            border-radius: 50px;
+            box-shadow: var(--glass-shadow);
+            border: 1px solid var(--glass-border);
+        }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #555;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .tab-btn:hover { background: rgba(30,136,229,0.08); color: var(--primary-blue); }
+        .tab-btn.active {
+            background: var(--primary-blue);
+            color: white;
+            box-shadow: 0 4px 12px rgba(15,76,129,0.3);
+        }
+
+        .tab-content {
+            display: none;
+            background: var(--glass-bg);
+            backdrop-filter: blur(8px);
+            border-radius: var(--card-radius);
+            border: 1px solid var(--glass-border);
+            padding: 25px 28px;
+            box-shadow: var(--glass-shadow);
+            margin-top: 5px;
+        }
+        .tab-content.active { display: block; }
+        .tab-content h3 {
+            font-size: 1.5rem;
+            color: var(--primary-blue);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-wrap { overflow-x: auto; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        th {
+            text-align: left;
+            padding: 12px 14px;
+            background: #f0f4f8;
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #eaeef4;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-badge.green { background: #e8f5e9; color: #2e7d32; }
+        .status-badge.red { background: #ffebee; color: #c62828; }
+        .status-badge.yellow { background: #fff8e1; color: #f57f17; }
+        .status-badge.blue { background: #e3f2fd; color: #0d47a1; }
+        .status-badge.grey { background: #eceff1; color: #455a64; }
+
+        .btn-sm {
+            padding: 5px 14px;
+            border: none;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--secondary-blue);
+            color: white;
+        }
+        .btn-sm:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(30,136,229,0.3); }
+        .btn-sm.warning { background: #ffa726; }
+        .btn-sm.danger { background: #e53935; }
+        .btn-sm.success { background: var(--accent-green); }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.visible { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: var(--card-radius);
+            padding: 30px 35px;
+            max-width: 560px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .modal-box h3 { color: var(--primary-blue); margin-bottom: 20px; }
+        .modal-box label { display: block; font-weight: 500; margin-top: 14px; }
+        .modal-box input, .modal-box select, .modal-box textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            margin-top: 4px;
+            font-size: 0.95rem;
+        }
+        .modal-box .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 22px;
+            justify-content: flex-end;
+        }
+        .modal-box .btn-group button {
+            padding: 10px 28px;
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .modal-box .btn-group .btn-primary { background: var(--primary-blue); color: white; }
+        .modal-box .btn-group .btn-secondary { background: #e0e0e0; color: #333; }
+
+        .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .mt-16 { margin-top: 16px; }
+        .text-center { text-align: center; }
+
+        @media (max-width: 768px) {
+            .dash-header { flex-direction: column; align-items: stretch; }
+            .dash-header .right-group { flex-wrap: wrap; justify-content: space-between; }
+            .tabs { border-radius: 20px; padding: 8px 12px; gap: 4px; }
+            .tab-btn { padding: 8px 14px; font-size: 0.8rem; }
+            .tab-content { padding: 18px 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-wrap">
+
+    <!-- ===== HEADER ===== -->
+    <header class="dash-header">
+        <a href="index.html" class="logo">
+            <i class="fa-solid fa-hands-asl-interpreting"></i> ISYARA Admin
+        </a>
+        <div class="right-group">
+            <select id="instansiSelect">
+                <option value="all">Semua Instansi</option>
+                <option value="Dinas Kesehatan Kota A">Dinas Kesehatan Kota A</option>
+                <option value="Dinas Capil Kota B">Dinas Capil Kota B</option>
+            </select>
+            <div class="notif-badge" id="notifBell" title="Notifikasi">
+                <i class="fa-regular fa-bell"></i>
+                <span class="badge-count" id="notifCount">0</span>
+            </div>
+            <div class="user-info">
+                <span id="userNameDisplay">Superadmin</span>
+                <div class="avatar" id="userAvatar">SA</div>
+            </div>
+            <button class="qa-toggle" id="qaToggleBtn" title="Panel QA (testing)"><i class="fa-solid fa-gear"></i></button>
+        </div>
+    </header>
+
+    <!-- ===== PANEL QA ===== -->
+    <div class="qa-panel" id="qaPanel">
+        <span style="font-weight:600; color:#e65100;"><i class="fa-solid fa-flask"></i> Panel QA / Simulasi</span>
+        <button class="danger-btn" id="simulateCloudDown">💥 Simulasi Cloud Down</button>
+        <button id="simulateBugUpdate">🐛 Simulasi Bug Update</button>
+        <button id="resetAllData">🔄 Reset Data</button>
+        <span style="font-size:0.8rem; color:#888; margin-left:auto;">Hanya untuk pengujian</span>
+    </div>
+
+    <!-- ===== TABS ===== -->
+    <nav class="tabs" id="tabNav">
+        <button class="tab-btn active" data-tab="tab1"><i class="fa-regular fa-circle-check"></i> Status</button>
+        <button class="tab-btn" data-tab="tab2"><i class="fa-regular fa-list"></i> Event</button>
+        <button class="tab-btn" data-tab="tab3"><i class="fa-regular fa-circle-exclamation"></i> Insiden</button>
+        <button class="tab-btn" data-tab="tab4"><i class="fa-regular fa-pen-to-square"></i> Request</button>
+        <button class="tab-btn" data-tab="tab5"><i class="fa-regular fa-bug"></i> Problem & KEDB</button>
+        <button class="tab-btn" data-tab="tab6" id="adminTabBtn"><i class="fa-regular fa-users-gear"></i> Admin</button>
+    </nav>
+
+    <!-- ===== TAB 1: STATUS ===== -->
+    <div class="tab-content active" id="tab1">
+        <div class="flex-between">
+            <h3><i class="fa-regular fa-heart-pulse"></i> Status Layanan</h3>
+            <span style="font-size:0.85rem; color:#666;">Auto-refresh setiap 5 detik</span>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Layanan</th><th>Status</th><th>Latensi</th><th>Akurasi AI</th></tr></thead>
+                <tbody id="statusTableBody">
+                    <tr><td><strong>Sign‑to‑Text</strong></td><td><span class="status-badge green" id="signStatus">🟢 Normal</span></td><td id="signLatency">0.9 dtk</td><td id="signAccuracy">92%</td></tr>
+                    <tr><td><strong>Speech‑to‑Text</strong></td><td><span class="status-badge green" id="speechStatus">🟢 Normal</span></td><td id="speechLatency">0.8 dtk</td><td id="speechAccuracy">-</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div style="margin-top: 12px; font-size:0.85rem; color:#666;">
+            <i class="fa-regular fa-circle-info"></i> Data status diambil dari event terakhir dan simulasi QA.
+        </div>
+    </div>
+
+    <!-- ===== TAB 2: EVENT ===== -->
+    <div class="tab-content" id="tab2">
+        <div class="flex-between">
+            <h3><i class="fa-regular fa-list"></i> Event Monitoring</h3>
+            <div>
+                <button class="btn-sm" id="addEventBtn"><i class="fa-regular fa-plus"></i> Tambah Event</button>
+                <button class="btn-sm" id="clearAllEvents" style="background:#999;">Hapus Semua</button>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Waktu</th><th>Kategori</th><th>Deskripsi</th><th>Instansi</th><th>Aksi</th></tr></thead>
+                <tbody id="eventTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ===== TAB 3: INSIDEN ===== -->
+    <div class="tab-content" id="tab3">
+        <div class="flex-between">
+            <h3><i class="fa-regular fa-circle-exclamation"></i> Insiden (Tiket Gangguan)</h3>
+            <div>
+                <button class="btn-sm" id="addInsidenBtn"><i class="fa-regular fa-plus"></i> Tambah Insiden</button>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>ID</th><th>Judul</th><th>Prioritas</th><th>Status</th><th>Sumber</th><th>Aksi</th></tr></thead>
+                <tbody id="insidenTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ===== TAB 4: REQUEST ===== -->
+    <div class="tab-content" id="tab4">
+        <div class="flex-between">
+            <h3><i class="fa-regular fa-pen-to-square"></i> Request Layanan</h3>
+            <button class="btn-sm" id="createRequestBtn"><i class="fa-regular fa-plus"></i> Buat Request</button>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>ID Request</th><th>Jenis Layanan</th><th>Prioritas</th><th>Status</th><th>Sumber</th><th>Aksi</th></tr></thead>
+                <tbody id="requestTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ===== TAB 5: PROBLEM & KEDB ===== -->
+    <div class="tab-content" id="tab5">
+        <div class="flex-between">
+            <h3><i class="fa-regular fa-bug"></i> Problem Aktif</h3>
+            <button class="btn-sm" id="addProblemBtn"><i class="fa-regular fa-plus"></i> Tambah Problem</button>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>ID Problem</th><th>Judul</th><th>Sumber</th><th>Status</th><th>Aksi</th></tr></thead>
+                <tbody id="problemTableBody"></tbody>
+            </table>
+        </div>
+        <h3 style="margin-top:30px;"><i class="fa-regular fa-database"></i> KEDB (Known Error Database)</h3>
+        <div class="flex-between" style="margin-bottom: 12px;">
+            <span></span>
+            <button class="btn-sm" id="addKEDBBtn"><i class="fa-regular fa-plus"></i> Tambah KEDB</button>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Kode Error</th><th>Deskripsi</th><th>Workaround</th><th>Status Solusi</th><th>Aksi</th></tr></thead>
+                <tbody id="kedbTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ===== TAB 6: ADMIN ===== -->
+    <div class="tab-content" id="tab6">
+        <div class="flex-between">
+            <h3><i class="fa-regular fa-users-gear"></i> Manajemen Admin</h3>
+            <button class="btn-sm" id="addAdminBtn"><i class="fa-regular fa-user-plus"></i> Tambah Admin</button>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Username</th><th>Instansi</th><th>Status</th><th>Aksi</th></tr></thead>
+                <tbody id="adminTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- ===== MODAL GENERIK ===== -->
+<div class="modal-overlay" id="genericModal">
+    <div class="modal-box" id="modalBox">
+        <h3 id="modalTitle">Modal</h3>
+        <div id="modalBody"></div>
+        <div class="btn-group" id="modalFooter">
+            <button class="btn-secondary" id="modalCancel">Batal</button>
+            <button class="btn-primary" id="modalConfirm">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<script src="state_manager.js"></script>
+<script>
+    (function() {
+        "use strict";
+
+        // --- PROTEKSI AKSES ---
+        if (!StateManager.isLoggedIn()) {
+            window.location.href = '403.html';
+            return;
+        }
+
+        // --- GLOBAL ---
+        let currentInstansi = StateManager.getCurrentInstansi();
+
+        // --- RENDER FUNCTIONS ---
+
+        function renderStatus() {
+            const qa = StateManager.getQASimulation();
+            const cloudDown = qa.cloudDown;
+            const signStatus = document.getElementById('signStatus');
+            const speechStatus = document.getElementById('speechStatus');
+            const signLat = document.getElementById('signLatency');
+            const speechLat = document.getElementById('speechLatency');
+            const signAcc = document.getElementById('signAccuracy');
+
+            if (cloudDown) {
+                signStatus.innerHTML = '🔴 DOWN';
+                signStatus.className = 'status-badge red';
+                speechStatus.innerHTML = '🔴 DOWN';
+                speechStatus.className = 'status-badge red';
+                signLat.textContent = '-';
+                speechLat.textContent = '-';
+                signAcc.textContent = '-';
+            } else {
+                const isBackup = qa.bugUpdate;
+                const label = isBackup ? '🟡 Backup Active' : '🟢 Normal';
+                signStatus.innerHTML = label;
+                signStatus.className = 'status-badge ' + (isBackup ? 'yellow' : 'green');
+                speechStatus.innerHTML = label;
+                speechStatus.className = 'status-badge ' + (isBackup ? 'yellow' : 'green');
+                signLat.textContent = isBackup ? '1.8 dtk' : '0.9 dtk';
+                speechLat.textContent = isBackup ? '1.6 dtk' : '0.8 dtk';
+                signAcc.textContent = isBackup ? '78%' : '92%';
+            }
+        }
+
+        function renderEvents() {
+            const tbody = document.getElementById('eventTableBody');
+            const events = StateManager.getEvents(currentInstansi);
+            if (events.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center" style="padding:30px; color:#888;">Tidak ada event</td></tr>`;
+                return;
+            }
+            let html = '';
+            events.forEach(ev => {
+                const icon = ev.kategori === 'Exception' ? '❌' : ev.kategori === 'Warning' ? '⚠️' : 'ℹ️';
+                const isException = ev.kategori === 'Exception';
+                html += `<tr>
+                    <td>${ev.waktu}</td>
+                    <td>${icon} ${ev.kategori}</td>
+                    <td>${ev.deskripsi}</td>
+                    <td>${ev.instansi}</td>
+                    <td>
+                        ${isException && !ev.eskalasi ? `<button class="btn-sm warning" data-event-id="${ev.id}" onclick="eskalasiEvent(${ev.id})">Eskalasi</button>` : ''}
+                        <button class="btn-sm" style="background:#999;" onclick="hapusEvent(${ev.id})">Hapus</button>
+                    </td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function renderInsiden() {
+            const tbody = document.getElementById('insidenTableBody');
+            const data = StateManager.getInsiden(currentInstansi);
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center" style="padding:30px; color:#888;">Tidak ada insiden</td></tr>`;
+                return;
+            }
+            let html = '';
+            data.forEach(inc => {
+                const statusColor = inc.status === 'Baru' ? 'red' : inc.status === 'Ditangani' ? 'yellow' : 'green';
+                const priorColor = inc.prioritas === 'Kritis' ? 'red' : inc.prioritas === 'Tinggi' ? 'red' : inc.prioritas === 'Sedang' ? 'yellow' : 'blue';
+                html += `<tr>
+                    <td><strong>${inc.id}</strong></td>
+                    <td>${inc.judul}</td>
+                    <td><span class="status-badge ${priorColor}">${inc.prioritas}</span></td>
+                    <td><span class="status-badge ${statusColor}">${inc.status}</span></td>
+                    <td>${inc.sumber || 'Sistem'}</td>
+                    <td>
+                        <button class="btn-sm" onclick="detailInsiden('${inc.id}')">Detail</button>
+                        <button class="btn-sm danger" onclick="hapusInsiden('${inc.id}')">Hapus</button>
+                    </td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function renderRequests() {
+            const tbody = document.getElementById('requestTableBody');
+            const data = StateManager.getRequests(currentInstansi);
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center" style="padding:30px; color:#888;">Tidak ada request</td></tr>`;
+                return;
+            }
+            let html = '';
+            data.forEach(req => {
+                const priorColor = req.prioritas === 'Kritis' ? 'red' : req.prioritas === 'Tinggi' ? 'red' : req.prioritas === 'Sedang' ? 'yellow' : 'blue';
+                const statusColor = req.status === 'Menunggu Approval' ? 'blue' : req.status === 'Disetujui' ? 'green' : 'red';
+                html += `<tr>
+                    <td><strong>${req.id}</strong></td>
+                    <td>${req.jenis}</td>
+                    <td><span class="status-badge ${priorColor}">${req.prioritas}</span></td>
+                    <td><span class="status-badge ${statusColor}">${req.status}</span></td>
+                    <td>${req.sumber || 'Admin'}</td>
+                    <td>
+                        <button class="btn-sm" onclick="detailRequest('${req.id}')">Detail</button>
+                        <button class="btn-sm danger" onclick="hapusRequest('${req.id}')">Hapus</button>
+                    </td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function renderProblems() {
+            const tbody = document.getElementById('problemTableBody');
+            const data = StateManager.getProblems(currentInstansi);
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center" style="padding:30px; color:#888;">Tidak ada problem aktif</td></tr>`;
+                return;
+            }
+            let html = '';
+            data.forEach(p => {
+                const statusColor = p.status === 'Selesai' ? 'green' : 'yellow';
+                html += `<tr>
+                    <td><strong>${p.id}</strong></td>
+                    <td>${p.judul}</td>
+                    <td>${p.sumber}</td>
+                    <td><span class="status-badge ${statusColor}">${p.status}</span></td>
+                    <td>
+                        <button class="btn-sm success" onclick="simpanKeKEDB('${p.id}')">Simpan ke KEDB</button>
+                        <button class="btn-sm danger" onclick="hapusProblem('${p.id}')">Hapus</button>
+                    </td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function renderKEDB() {
+            const tbody = document.getElementById('kedbTableBody');
+            const data = StateManager.getKEDB();
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center" style="padding:30px; color:#888;">Belum ada KEDB</td></tr>`;
+                return;
+            }
+            let html = '';
+            data.forEach(k => {
+                html += `<tr>
+                    <td><strong>${k.kode}</strong></td>
+                    <td>${k.deskripsi}</td>
+                    <td>${k.workaround}</td>
+                    <td>${k.statusSolusi}</td>
+                    <td>
+                        <button class="btn-sm danger" onclick="hapusKEDB('${k.kode}')">Hapus</button>
+                    </td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function renderAdmin() {
+            const tbody = document.getElementById('adminTableBody');
+            const users = StateManager.getUsers();
+            if (users.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center" style="padding:30px; color:#888;">Tidak ada user</td></tr>`;
+                return;
+            }
+            let html = '';
+            users.forEach(u => {
+                const isActive = u.status !== 'Nonaktif';
+                html += `<tr>
+                    <td><strong>${u.username}</strong></td>
+                    <td>${u.instansi}</td>
+                    <td><span class="status-badge ${isActive ? 'green' : 'grey'}">${isActive ? 'Aktif' : 'Nonaktif'}</span></td>
+                    <td>
+                        <button class="btn-sm danger" onclick="toggleUser('${u.username}')">${isActive ? 'Nonaktifkan' : 'Aktifkan'}</button>
+                        ${u.username !== 'superadmin' ? `<button class="btn-sm" style="background:#999;" onclick="hapusUser('${u.username}')">Hapus</button>` : ''}
+                    </td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function updateNotifBadge() {
+            const count = StateManager.getNotifCount();
+            document.getElementById('notifCount').textContent = count;
+            const bell = document.getElementById('notifBell').querySelector('i');
+            bell.className = count > 0 ? 'fa-solid fa-bell' : 'fa-regular fa-bell';
+        }
+
+        function updateUserDisplay() {
+            const user = StateManager.getCurrentUser();
+            if (user) {
+                document.getElementById('userNameDisplay').textContent = user.username;
+                document.getElementById('userAvatar').textContent = user.username.substring(0,2).toUpperCase();
+            }
+            toggleAdminTab();
+        }
+
+        function toggleAdminTab() {
+            const isSuper = StateManager.isSuperadmin();
+            const adminTab = document.getElementById('adminTabBtn');
+            if (isSuper) {
+                adminTab.style.display = 'inline-block';
+            } else {
+                adminTab.style.display = 'none';
+                if (document.getElementById('tab6').classList.contains('active')) {
+                    switchTab('tab1');
+                }
+            }
+        }
+
+        function renderAll() {
+            renderStatus();
+            renderEvents();
+            renderInsiden();
+            renderRequests();
+            renderProblems();
+            renderKEDB();
+            renderAdmin();
+            updateNotifBadge();
+            updateUserDisplay();
+        }
+
+        // --- TAB SWITCHING ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+            // render ulang konten yang mungkin berubah
+            if (tabId === 'tab2') renderEvents();
+            if (tabId === 'tab3') renderInsiden();
+            if (tabId === 'tab4') renderRequests();
+            if (tabId === 'tab5') { renderProblems(); renderKEDB(); }
+            if (tabId === 'tab6') renderAdmin();
+        }
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tabId = this.dataset.tab;
+                if (tabId === 'tab6' && !StateManager.isSuperadmin()) {
+                    alert('Akses ditolak. Anda bukan superadmin.');
+                    return;
+                }
+                switchTab(tabId);
+            });
+        });
+
+        // --- EVENT OPERATIONS ---
+        window.eskalasiEvent = function(eventId) {
+            const events = StateManager.getAllEvents();
+            const ev = events.find(e => e.id === eventId);
+            if (!ev || ev.eskalasi) return;
+            
+            StateManager.addInsiden({
+                judul: ev.deskripsi.substring(0, 40),
+                prioritas: 'Kritis',
+                instansi: ev.instansi || 'Pusat',
+                sumber: 'Eskalasi Event'
+            });
+            
+            ev.eskalasi = true;
+            StateManager.saveState(StateManager.getState());
+            renderAll();
+            switchTab('tab3');
+        };
+
+        window.hapusEvent = function(eventId) {
+            if (!confirm('Hapus event ini?')) return;
+            StateManager.deleteEvent(eventId);
+            renderEvents();
+        };
+
+        document.getElementById('clearAllEvents').addEventListener('click', function() {
+            if (!confirm('Hapus semua event?')) return;
+            StateManager.clearEvents();
+            renderEvents();
+        });
+
+        // --- Tambah Event ---
+        document.getElementById('addEventBtn').addEventListener('click', function() {
+            showModal('Tambah Event Baru', `
+                <label>Kategori</label>
+                <select id="eventKategori">
+                    <option value="Info">Info</option>
+                    <option value="Warning">Warning</option>
+                    <option value="Exception">Exception</option>
+                </select>
+                <label>Deskripsi</label>
+                <input type="text" id="eventDeskripsi" placeholder="Deskripsi event">
+                <label>Instansi</label>
+                <select id="eventInstansi">
+                    <option value="Pusat">Pusat</option>
+                    <option value="Dinas Kesehatan Kota A">Dinas Kesehatan Kota A</option>
+                    <option value="Dinas Capil Kota B">Dinas Capil Kota B</option>
+                </select>
+            `, function() {
+                const kategori = document.getElementById('eventKategori').value;
+                const deskripsi = document.getElementById('eventDeskripsi').value.trim();
+                const instansi = document.getElementById('eventInstansi').value;
+                if (!deskripsi) { alert('Deskripsi wajib diisi'); return false; }
+                StateManager.addEvent({ kategori, deskripsi, instansi });
+                renderAll();
+                return true;
+            });
+        });
+
+        // --- INSIDEN OPERATIONS ---
+        window.detailInsiden = function(incId) {
+            const data = StateManager.getAllInsiden();
+            const inc = data.find(i => i.id === incId);
+            if (!inc) return;
+            
+            showModal('Detail Insiden: ' + incId, `
+                <p><strong>Judul:</strong> ${inc.judul}</p>
+                <p><strong>Prioritas:</strong> ${inc.prioritas}</p>
+                <p><strong>Status saat ini:</strong> ${inc.status}</p>
+                <p><strong>Sumber:</strong> ${inc.sumber || 'Sistem'}</p>
+                <label>Ubah Status:</label>
+                <select id="modalStatusSelect">
+                    <option value="Baru" ${inc.status==='Baru'?'selected':''}>Baru</option>
+                    <option value="Ditangani" ${inc.status==='Ditangani'?'selected':''}>Ditangani</option>
+                    <option value="Selesai" ${inc.status==='Selesai'?'selected':''}>Selesai</option>
+                </select>
+                ${!inc.escalatedToProblem ? `<button class="btn-sm warning" style="margin-top:14px;" id="eskalasiProblemBtn">Eskalasi ke Problem</button>` : ''}
+            `, function() {
+                const newStatus = document.getElementById('modalStatusSelect').value;
+                StateManager.updateInsiden(incId, { status: newStatus });
+                renderAll();
+                return true;
+            }, function() {
+                // setelah modal siap, tambahkan event listener untuk eskalasi
+                const eskalasiBtn = document.getElementById('eskalasiProblemBtn');
+                if (eskalasiBtn) {
+                    eskalasiBtn.onclick = function() {
+                        if (confirm('Eskalasi insiden ini ke Problem Management?')) {
+                            StateManager.escalateToProblem(incId);
+                            renderAll();
+                            closeModal();
+                            switchTab('tab5');
+                        }
+                    };
+                }
+            });
+        };
+
+        window.hapusInsiden = function(incId) {
+            if (!confirm('Hapus insiden ini?')) return;
+            StateManager.deleteInsiden(incId);
+            renderAll();
+        };
+
+        // --- Tambah Insiden ---
+        document.getElementById('addInsidenBtn').addEventListener('click', function() {
+            showModal('Tambah Insiden Baru', `
+                <label>Judul</label>
+                <input type="text" id="incJudul" placeholder="Judul insiden">
+                <label>Prioritas</label>
+                <select id="incPrioritas">
+                    <option value="Rendah">Rendah</option>
+                    <option value="Sedang">Sedang</option>
+                    <option value="Tinggi">Tinggi</option>
+                    <option value="Kritis">Kritis</option>
+                </select>
+                <label>Instansi</label>
+                <select id="incInstansi">
+                    <option value="Pusat">Pusat</option>
+                    <option value="Dinas Kesehatan Kota A">Dinas Kesehatan Kota A</option>
+                    <option value="Dinas Capil Kota B">Dinas Capil Kota B</option>
+                </select>
+            `, function() {
+                const judul = document.getElementById('incJudul').value.trim();
+                const prioritas = document.getElementById('incPrioritas').value;
+                const instansi = document.getElementById('incInstansi').value;
+                if (!judul) { alert('Judul wajib diisi'); return false; }
+                StateManager.addInsiden({ judul, prioritas, instansi, sumber: 'Admin' });
+                renderAll();
+                return true;
+            });
+        });
+
+        // --- REQUEST OPERATIONS ---
+        document.getElementById('createRequestBtn').addEventListener('click', function() {
+            showModal('Buat Request Baru', `
+                <label>Jenis Layanan</label>
+                <input type="text" id="reqJenis" placeholder="Misal: Aktivasi Loket 5">
+                <label>Prioritas</label>
+                <select id="reqPrioritas">
+                    <option value="Rendah">Rendah</option>
+                    <option value="Sedang" selected>Sedang</option>
+                    <option value="Tinggi">Tinggi</option>
+                    <option value="Kritis">Kritis</option>
+                </select>
+                <label>Instansi</label>
+                <select id="reqInstansi">
+                    <option value="Pusat">Pusat</option>
+                    <option value="Dinas Kesehatan Kota A">Dinas Kesehatan Kota A</option>
+                    <option value="Dinas Capil Kota B">Dinas Capil Kota B</option>
+                </select>
+            `, function() {
+                const jenis = document.getElementById('reqJenis').value.trim();
+                const prioritas = document.getElementById('reqPrioritas').value;
+                const instansi = document.getElementById('reqInstansi').value;
+                if (!jenis) { alert('Jenis layanan wajib diisi'); return false; }
+                StateManager.addRequest({ jenis, prioritas, instansi, sumber: 'Admin' });
+                renderAll();
+                return true;
+            });
+        });
+
+        window.detailRequest = function(reqId) {
+            const data = StateManager.getAllRequests();
+            const req = data.find(r => r.id === reqId);
+            if (!req) return;
+            
+            showModal('Detail Request: ' + reqId, `
+                <p><strong>Jenis:</strong> ${req.jenis}</p>
+                <p><strong>Prioritas:</strong> ${req.prioritas}</p>
+                <p><strong>Status:</strong> ${req.status}</p>
+                <p><strong>Sumber:</strong> ${req.sumber || 'Admin'}</p>
+                <label>Ubah Status:</label>
+                <select id="reqStatusSelect">
+                    <option value="Menunggu Approval" ${req.status==='Menunggu Approval'?'selected':''}>Menunggu Approval</option>
+                    <option value="Disetujui" ${req.status==='Disetujui'?'selected':''}>Disetujui</option>
+                    <option value="Ditolak" ${req.status==='Ditolak'?'selected':''}>Ditolak</option>
+                </select>
+            `, function() {
+                StateManager.updateRequest(reqId, { status: document.getElementById('reqStatusSelect').value });
+                renderAll();
+                return true;
+            });
+        };
+
+        window.hapusRequest = function(reqId) {
+            if (!confirm('Hapus request ini?')) return;
+            StateManager.deleteRequest(reqId);
+            renderAll();
+        };
+
+        // --- PROBLEM & KEDB ---
+        window.simpanKeKEDB = function(probId) {
+            if (!confirm(`Simpan problem ${probId} ke KEDB?`)) return;
+            StateManager.moveToKEDB(probId);
+            renderAll();
+            alert('Problem berhasil dipindahkan ke KEDB.');
+        };
+
+        window.hapusProblem = function(probId) {
+            if (!confirm('Hapus problem ini?')) return;
+            StateManager.deleteProblem(probId);
+            renderAll();
+        };
+
+        document.getElementById('addProblemBtn').addEventListener('click', function() {
+            showModal('Tambah Problem Baru', `
+                <label>Judul Problem</label>
+                <input type="text" id="probJudul" placeholder="Judul problem">
+                <label>Sumber (ID Insiden)</label>
+                <input type="text" id="probSumber" placeholder="Misal: INC-1002">
+                <label>Instansi</label>
+                <select id="probInstansi">
+                    <option value="Pusat">Pusat</option>
+                    <option value="Dinas Kesehatan Kota A">Dinas Kesehatan Kota A</option>
+                    <option value="Dinas Capil Kota B">Dinas Capil Kota B</option>
+                </select>
+            `, function() {
+                const judul = document.getElementById('probJudul').value.trim();
+                const sumber = document.getElementById('probSumber').value.trim() || 'Sistem';
+                const instansi = document.getElementById('probInstansi').value;
+                if (!judul) { alert('Judul wajib diisi'); return false; }
+                StateManager.addProblem({ judul, sumber, instansi });
+                renderAll();
+                return true;
+            });
+        });
+
+        window.hapusKEDB = function(kode) {
+            if (!confirm('Hapus KEDB ini?')) return;
+            StateManager.deleteKEDB(kode);
+            renderAll();
+        };
+
+        document.getElementById('addKEDBBtn').addEventListener('click', function() {
+            showModal('Tambah KEDB Baru', `
+                <label>Deskripsi Error</label>
+                <input type="text" id="kedbDeskripsi" placeholder="Deskripsi error">
+                <label>Workaround</label>
+                <input type="text" id="kedbWorkaround" placeholder="Solusi sementara">
+                <label>Status Solusi</label>
+                <select id="kedbStatus">
+                    <option value="Sedang dikaji">Sedang dikaji</option>
+                    <option value="Selesai">Selesai</option>
+                </select>
+            `, function() {
+                const deskripsi = document.getElementById('kedbDeskripsi').value.trim();
+                const workaround = document.getElementById('kedbWorkaround').value.trim();
+                const statusSolusi = document.getElementById('kedbStatus').value;
+                if (!deskripsi) { alert('Deskripsi wajib diisi'); return false; }
+                StateManager.addKEDB({ deskripsi, workaround: workaround || 'Belum ada', statusSolusi });
+                renderAll();
+                return true;
+            });
+        });
+
+        // --- ADMIN OPERATIONS ---
+        window.toggleUser = function(username) {
+            const user = StateManager.getUser(username);
+            if (!user) return;
+            const newStatus = user.status === 'Nonaktif' ? 'Aktif' : 'Nonaktif';
+            StateManager.updateUser(username, { status: newStatus });
+            renderAdmin();
+        };
+
+        window.hapusUser = function(username) {
+            if (!confirm(`Hapus user ${username}?`)) return;
+            try {
+                StateManager.deleteUser(username);
+                renderAdmin();
+            } catch(e) {
+                alert(e.message);
+            }
+        };
+
+        document.getElementById('addAdminBtn').addEventListener('click', function() {
+            showModal('Tambah Admin Baru', `
+                <label>Username</label>
+                <input type="text" id="newUsername" placeholder="username">
+                <label>Password</label>
+                <input type="password" id="newPassword" placeholder="password">
+                <label>Instansi</label>
+                <select id="newInstansi">
+                    <option value="Pusat">Pusat</option>
+                    <option value="Dinas Kesehatan Kota A">Dinas Kesehatan Kota A</option>
+                    <option value="Dinas Capil Kota B">Dinas Capil Kota B</option>
+                </select>
+                <label>Role</label>
+                <select id="newRole">
+                    <option value="admin">Admin</option>
+                    <option value="superadmin">Superadmin</option>
+                </select>
+            `, function() {
+                const username = document.getElementById('newUsername').value.trim();
+                const password = document.getElementById('newPassword').value.trim();
+                const instansi = document.getElementById('newInstansi').value;
+                const role = document.getElementById('newRole').value;
+                if (!username || !password) { alert('Isi username dan password'); return false; }
+                try {
+                    StateManager.addUser({ username, password, instansi, role });
+                    renderAll();
+                    return true;
+                } catch(e) {
+                    alert(e.message);
+                    return false;
+                }
+            });
+        });
+
+        // --- FILTER INSTANSI ---
+        document.getElementById('instansiSelect').addEventListener('change', function() {
+            currentInstansi = this.value;
+            StateManager.setCurrentInstansi(currentInstansi);
+            renderAll();
+        });
+
+        // --- NOTIFIKASI ---
+        document.getElementById('notifBell').addEventListener('click', function() {
+            const data = StateManager.getAllInsiden();
+            const baru = data.filter(i => i.status === 'Baru' || i.status === 'Menunggu Approval');
+            if (baru.length === 0) {
+                alert('Tidak ada notifikasi baru.');
+                return;
+            }
+            let msg = 'Notifikasi:\n';
+            baru.forEach((i, idx) => {
+                msg += `${idx+1}. ${i.id} - ${i.judul} (${i.status})\n`;
+            });
+            alert(msg);
+        });
+
+        // --- PANEL QA ---
+        document.getElementById('qaToggleBtn').addEventListener('click', function() {
+            document.getElementById('qaPanel').classList.toggle('visible');
+        });
+
+        document.getElementById('simulateCloudDown').addEventListener('click', function() {
+            const status = StateManager.toggleCloudDown();
+            renderAll();
+            alert('Simulasi Cloud Down: ' + (status ? 'AKTIF' : 'NONAKTIF'));
+        });
+
+        document.getElementById('simulateBugUpdate').addEventListener('click', function() {
+            const status = StateManager.toggleBugUpdate();
+            renderAll();
+            alert('Simulasi Bug Update: ' + (status ? 'AKTIF' : 'NONAKTIF (rollback)'));
+        });
+
+        document.getElementById('resetAllData').addEventListener('click', function() {
+            if (!confirm('Reset semua data ke default dengan seed? Semua perubahan akan hilang.')) return;
+            StateManager.resetState();
+            currentInstansi = 'all';
+            document.getElementById('instansiSelect').value = 'all';
+            renderAll();
+            alert('Data telah direset ke seed awal.');
+        });
+
+        // --- MODAL HELPER ---
+        let modalCallback = null;
+        let modalPostRender = null;
+
+        function showModal(title, bodyHTML, onConfirm, onRender) {
+            const modal = document.getElementById('genericModal');
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalBody').innerHTML = bodyHTML;
+            document.getElementById('modalFooter').style.display = 'flex';
+            document.getElementById('modalConfirm').textContent = 'Simpan';
+            modalCallback = onConfirm;
+            modalPostRender = onRender || null;
+            modal.classList.add('visible');
+            // panggil post-render setelah modal muncul
+            if (modalPostRender) {
+                setTimeout(modalPostRender, 50);
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('genericModal').classList.remove('visible');
+            modalCallback = null;
+            modalPostRender = null;
+        }
+        window.closeModal = closeModal;
+
+        document.getElementById('modalConfirm').addEventListener('click', function() {
+            if (modalCallback) {
+                const result = modalCallback();
+                if (result !== false) {
+                    closeModal();
+                }
+            }
+        });
+
+        document.getElementById('modalCancel').addEventListener('click', closeModal);
+        document.getElementById('genericModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // --- AUTO-REFRESH ---
+        setInterval(function() {
+            renderStatus();
+            updateNotifBadge();
+        }, 5000);
+
+        // --- INISIALISASI ---
+        document.getElementById('instansiSelect').value = currentInstansi;
+        renderAll();
+        console.log('Dashboard ISYARA siap. Role:', StateManager.getCurrentUser()?.role);
+
+        // Ekspos fungsi global untuk onclick
+        window.eskalasiEvent = eskalasiEvent;
+        window.hapusEvent = hapusEvent;
+        window.detailInsiden = detailInsiden;
+        window.hapusInsiden = hapusInsiden;
+        window.detailRequest = detailRequest;
+        window.hapusRequest = hapusRequest;
+        window.simpanKeKEDB = simpanKeKEDB;
+        window.hapusProblem = hapusProblem;
+        window.hapusKEDB = hapusKEDB;
+        window.toggleUser = toggleUser;
+        window.hapusUser = hapusUser;
+        window.closeModal = closeModal;
+
+    })();
+</script>
+</body>
+</html>

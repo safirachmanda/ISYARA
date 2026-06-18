@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ISYARA Frontdesk • Penerjemah Isyarat BISINDO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js">
+    </script>
+
+    <style>
+        :root {
+            --bg: #f5f7fa;
+            --surface: #ffffff;
+            --primary: #0f4c81;
+            --primary-light: #e8f0fe;
+            --accent: #00bfa5;
+            --accent-light: #e6faf7;
+            --text: #1a1f36;
+            --text-secondary: #5b616e;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --radius: 16px;
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        nav {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo i {
+            color: var(--accent);
+            font-size: 1.5rem;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-nav {
+            padding: 8px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-nav:hover {
+            background: var(--primary-light);
+            border-color: var(--primary);
+        }
+
+        .btn-nav.accent {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .btn-nav.accent:hover {
+            background: #00a891;
+            border-color: #00a891;
+        }
+
+        main {
+            flex: 1;
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 30px 5% 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .page-header {
+            text-align: center;
+        }
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-top: 4px;
+        }
+
+        .main-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .video-prediction-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: #1a1f36;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .cam-status {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+            z-index: 10;
+        }
+
+        .record-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--danger);
+            border-radius: 50%;
+            animation: pulse-danger 1.5s infinite;
+        }
+
+        @keyframes pulse-danger {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .prediction-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .auto-mode-indicator {
+            background: #f0fdfa;
+            border: 1px solid #b2ece2;
+            color: #0f766e;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .prediction-box {
+            text-align: center;
+            padding: 30px 20px;
+            background: #f9fafb;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .pred-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+        }
+        .pred-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: 1px;
+            transition: all 0.2s;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .confidence-meter {
+            background: #e5e7eb;
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .conf-bar {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 3px;
+        }
+        .conf-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .model-file {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 8px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .sequence-buffer {
+            background: #f9fafb;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.3s ease;
+        }
+        .buffer-header {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .buffer-track {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            min-height: 28px;
+            align-items: center;
+        }
+        .buf-item {
+            background: var(--primary-light);
+            border: 1px solid #bfdbfe;
+            color: var(--primary);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            animation: slideInRight 0.3s ease-out forwards;
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .history-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px 24px;
+        }
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+        .history-header h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+        }
+
+        .btn-reset {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--danger);
+            background: #fff;
+            color: var(--danger);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-reset:hover { background: #fef2f2; }
+
+        .history-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            min-height: 50px;
+            align-items: flex-start;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 4px 0;
+        }
+        .history-item {
+            background: var(--accent-light);
+            border: 1px solid #b2ece2;
+            color: #0f766e;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            animation: popIn 0.3s ease-out forwards;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .history-item .conf-badge {
+            background: rgba(0, 0, 0, 0.08);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: #0f766e;
+        }
+        .history-placeholder {
+            color: #9ca3af;
+            font-style: italic;
+            font-size: 0.9rem;
+            width: 100%;
+            text-align: center;
+            padding: 16px 0;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .bottom-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .info-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            box-shadow: var(--shadow);
+        }
+        .info-card h3 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            padding: 6px 0;
+        }
+        .status-label { color: var(--text-secondary); }
+        .status-value {
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+        }
+        .status-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .dot-idle { background: #d1d5db; }
+        .dot-active { background: var(--success); box-shadow: 0 0 6px var(--success); }
+        .dot-warn { background: var(--warning); box-shadow: 0 0 6px var(--warning); }
+
+        .simulation-chat {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+        .chat-msg {
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            max-width: 92%;
+            animation: slideIn 0.25s ease-out forwards;
+            opacity: 0;
+            transform: translateX(10px);
+        }
+        .msg-deaf {
+            background: #f0f4ff;
+            border: 1px solid #dbeafe;
+            align-self: flex-start;
+            border-bottom-left-radius: 0;
+            color: var(--text);
+        }
+        .msg-agent {
+            background: #f0fdfa;
+            border: 1px solid #ccfbf1;
+            align-self: flex-end;
+            border-bottom-right-radius: 0;
+            color: #0f766e;
+        }
+        .chat-label {
+            font-size: 0.65rem;
+            opacity: 0.6;
+            display: block;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-sim {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 500;
+            border: none;
+            background: none;
+            padding: 0;
+        }
+        .btn-sim:hover { text-decoration: underline; }
+
+        @keyframes slideIn {
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .btn-restart-cam {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: var(--warning);
+            color: #000;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            z-index: 10;
+            display: none;
+        }
+        .btn-restart-cam.show { display: block; }
+
+        @media (max-width: 768px) {
+            .video-prediction-row { grid-template-columns: 1fr; }
+            .bottom-row { grid-template-columns: 1fr; }
+            .page-header h1 { font-size: 1.6rem; }
+            nav { flex-direction: column; gap: 10px; }
+            .pred-value { font-size: 2.2rem; }
+            .history-item { font-size: 0.8rem; padding: 6px 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="logo">
+            <i class="fa-solid fa-hands-asl-interpreting"></i> ISYARA Frontdesk
+        </a>
+        <div class="nav-buttons">
+            <a href="index.html" class="btn-nav"><i class="fa-solid fa-arrow-left"></i> Beranda</a>
+            <a href="speechtotext.html" class="btn-nav accent"><i class="fa-solid fa-microphone-lines"></i> Transkrip Ucapan</a>
+        </div>
+    </nav>
+
+    <main>
+        <div class="page-header">
+            <h1>Penerjemah Isyarat BISINDO</h1>
+            <p>Gunakan kamera untuk menerjemahkan bahasa isyarat ke teks. Hanya tangan yang terdeteksi.</p>
+        </div>
+
+        <div class="main-card">
+            <div class="video-prediction-row">
+                <div>
+                    <div class="video-wrapper">
+                        <video id="input_video" autoplay playsinline muted></video>
+                        <canvas id="output_canvas"></canvas>
+                        <div class="cam-status">
+                            <div class="record-dot"></div> <span id="camStatusTxt">MENGINISIALISASI...</span>
+                        </div>
+                        <button class="btn-restart-cam" id="btnRestartCam" onclick="restartCamera()">
+                            <i class="fa-solid fa-rotate-right"></i> Restart Kamera
+                        </button>
+                    </div>
+                </div>
+
+                <div class="prediction-area">
+                    <div class="auto-mode-indicator" id="auto-mode-indicator">
+                        <i class="fa-solid fa-robot"></i> Mode Otomatis: <span id="current-mode-text">Menganalisis...</span>
+                    </div>
+
+                    <div class="prediction-box">
+                        <div class="pred-label">Gestur Terdeteksi</div>
+                        <div class="pred-value" id="pred-text">--</div>
+                        <div class="confidence-meter">
+                            <div class="conf-bar" id="conf-bar"></div>
+                        </div>
+                        <div class="conf-text">Keyakinan: <span id="conf-val">0.0</span>%</div>
+                    </div>
+
+                    <div class="model-file" id="active-model">
+                        Memuat model AI...
+                    </div>
+
+                    <div class="sequence-buffer" id="sequence-buffer-area">
+                        <div class="buffer-header">
+                            <span>Buffer Sequence (Mode Kata)</span>
+                            <span>Frame: <span id="frame-count">0</span>/20</span>
+                        </div>
+                        <div class="buffer-track" id="buffer-track"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-card">
+            <div class="history-header">
+                <h3><i class="fa-solid fa-clock-rotate-left"></i> Riwayat Terjemahan</h3>
+                <button class="btn-reset" onclick="resetHistory()">
+                    <i class="fa-solid fa-trash-can"></i> Hapus Semua
+                </button>
+            </div>
+            <div class="history-container" id="history-container">
+                <div class="history-placeholder" id="history-placeholder">Belum ada gestur yang diterjemahkan...</div>
+            </div>
+        </div>
+
+        <div class="bottom-row">
+            <div class="info-card">
+                <h3><i class="fa-solid fa-gauge-high"></i> Status Sistem</h3>
+                <div class="status-row">
+                    <span class="status-label">TensorFlow.js</span>
+                    <span class="status-value" style="color: var(--success);">SIAP v3.18</span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">MediaPipe Hands</span>
+                    <span class="status-value" id="mediapipe-status">
+                        <span class="status-dot dot-idle"></span> MENUNGGU
+                    </span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">FPS Inference</span>
+                    <span class="status-value" id="fps-val">--</span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">Latensi (ms)</span>
+                    <span class="status-value" id="latency-val">--</span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">Total Terjemahan</span>
+                    <span class="status-value" id="total-translations">0</span>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3><i class="fa-solid fa-desktop"></i> Simulasi Frontdesk</h3>
+                <div class="simulation-chat" id="chat-box">
+                    <div style="text-align: center; color: var(--text-secondary); font-size: 0.85rem; font-style: italic; margin-top: 30px;">
+                        Menunggu input gestur...
+                    </div>
+                </div>
+                <button class="btn-sim" onclick="runSimulation()">
+                    <i class="fa-solid fa-rotate-right"></i> Jalankan simulasi
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // DOM Elements
+        const videoElement = document.getElementById('input_video');
+        const canvasElement = document.getElementById('output_canvas');
+        const canvasCtx = canvasElement.getContext('2d');
+        const predText = document.getElementById('pred-text');
+        const confBar = document.getElementById('conf-bar');
+        const confVal = document.getElementById('conf-val');
+        const fpsVal = document.getElementById('fps-val');
+        const latencyVal = document.getElementById('latency-val');
+        const bufferTrack = document.getElementById('buffer-track');
+        const frameCountEl = document.getElementById('frame-count');
+        const mediapipeStatus = document.getElementById('mediapipe-status');
+        const camStatusTxt = document.getElementById('camStatusTxt');
+        const historyContainer = document.getElementById('history-container');
+        const historyPlaceholder = document.getElementById('history-placeholder');
+        const totalTranslationsEl = document.getElementById('total-translations');
+        const currentModeText = document.getElementById('current-mode-text');
+        const sequenceBufferArea = document.getElementById('sequence-buffer-area');
+        const btnRestartCam = document.getElementById('btnRestartCam');
+
+        let currentMode = 'word';
+        let lastTime = performance.now();
+        let fps = 0;
+        let translationHistory = [];
+        let lastPrediction = null;
+        let lastPredictionTime = 0;
+        const DEBOUNCE_TIME = 2000;
+        let totalTranslations = 0;
+        let cameraInstance = null;
+        let isCameraActive = false;
+
+        let tfjsAbcModel = null;
+        let tfjsWordModel = null;
+        let sequenceBuffer = [];
+        const SEQUENCE_LENGTH = 20;
+
+        let previousLandmarks = null;
+        let movementAccumulator = 0;
+        let stabilityCounter = 0;
+        const MOVEMENT_THRESHOLD = 0.015;
+        const STABILITY_FRAMES = 8;
+
+        const alphabetChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+        const wordDictionary = [
+            "Apa", "Apa Kabar", "Bagaimana", "Baik", "Belajar", "Berapa", "Berdiri", "Bingung",
+            "Dia", "Dimana", "Duduk", "Halo", "Kalian", "Kami", "Kamu", "Kapan", "Kemana", "Kita",
+            "Makan", "Mandi", "Marah", "Melihat", "Membaca", "Menulis", "Mereka", "Minum", "Pendek",
+            "Ramah", "Sabar", "Saya", "Sedih", "Selamat Malam", "Selamat Pagi", "Selamat Siang",
+            "Selamat Sore", "Senang", "Siapa", "Terima Kasih", "Tidur", "Tinggi"
+        ];
+
+        async function loadAiModels() {
+            try {
+                document.getElementById('active-model').innerText = "⏳ Mengunduh model AI...";
+                document.getElementById('active-model').style.color = "var(--text-secondary)";
+                tfjsAbcModel = await tf.loadGraphModel('./tfjs_abc_model/model.json');
+                tfjsWordModel = await tf.loadGraphModel('./tfjs_word_model/model.json');
+                document.getElementById('active-model').innerText = "✅ Model AI siap!";
+                document.getElementById('active-model').style.color = "var(--success)";
+                updateModeUI();
+            } catch (error) {
+                console.error("❌ Gagal memuat model:", error);
+                document.getElementById('active-model').innerText = "❌ Gagal memuat model AI.";
+                document.getElementById('active-model').style.color = "var(--danger)";
+            }
+        }
+
+        function detectHandStability(currentLandmarks) {
+            if (!previousLandmarks || !currentLandmarks) {
+                previousLandmarks = currentLandmarks ? [...currentLandmarks] : null;
+                return;
+            }
+            let totalMovement = 0;
+            for (let i = 0; i < currentLandmarks.length; i++) {
+                const dx = currentLandmarks[i].x - previousLandmarks[i].x;
+                const dy = currentLandmarks[i].y - previousLandmarks[i].y;
+                totalMovement += Math.sqrt(dx * dx + dy * dy);
+            }
+            const avgMovement = totalMovement / currentLandmarks.length;
+            movementAccumulator = movementAccumulator * 0.8 + avgMovement * 0.2;
+            if (movementAccumulator < MOVEMENT_THRESHOLD) {
+                stabilityCounter++;
+                if (stabilityCounter >= STABILITY_FRAMES && currentMode !== 'alphabet') switchToMode('alphabet');
+            } else {
+                stabilityCounter = 0;
+                if (currentMode !== 'word') switchToMode('word');
+            }
+            previousLandmarks = [...currentLandmarks];
+        }
+
+        function switchToMode(mode) {
+            if (currentMode === mode) return;
+            currentMode = mode;
+            updateModeUI();
+        }
+
+        function updateModeUI() {
+            if (currentMode === 'alphabet') {
+                currentModeText.innerText = 'Alfabet (Statis)';
+                currentModeText.style.color = '#0f4c81';
+                sequenceBufferArea.style.opacity = '0.4';
+                sequenceBuffer = [];
+                bufferTrack.innerHTML = '';
+                frameCountEl.innerText = '0';
+            } else {
+                currentModeText.innerText = 'Kata (Sequence)';
+                currentModeText.style.color = '#0f766e';
+                sequenceBufferArea.style.opacity = '1';
+            }
+        }
+
+        function addToHistory(text, confidence) {
+            const now = Date.now();
+            if (text === lastPrediction && (now - lastPredictionTime) < DEBOUNCE_TIME) return;
+            if (text === '--' || text === 'Mengumpulkan...' || text === '') return;
+            lastPrediction = text;
+            lastPredictionTime = now;
+            translationHistory.push({
+                text: text,
+                confidence: confidence,
+                time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+            });
+            totalTranslations++;
+            totalTranslationsEl.innerText = totalTranslations;
+            renderHistoryItem(text, confidence);
+        }
+
+        function renderHistoryItem(text, confidence) {
+            if (historyPlaceholder) historyPlaceholder.style.display = 'none';
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            item.innerHTML = `<span>${text}</span><span class="conf-badge">${confidence}%</span>`;
+            historyContainer.appendChild(item);
+            historyContainer.scrollTop = historyContainer.scrollHeight;
+            while (historyContainer.children.length > 50) historyContainer.removeChild(historyContainer.firstChild);
+        }
+
+        function resetHistory() {
+            translationHistory = [];
+            totalTranslations = 0;
+            totalTranslationsEl.innerText = '0';
+            lastPrediction = null;
+            lastPredictionTime = 0;
+            historyContainer.innerHTML = '';
+            historyContainer.appendChild(historyPlaceholder);
+            historyPlaceholder.style.display = 'block';
+            historyPlaceholder.innerText = 'Belum ada gestur yang diterjemahkan...';
+        }
+
+        function flattenLandmarks(landmarks) {
+            let flatArray = [];
+            for (let i = 0; i < landmarks.length; i++) {
+                flatArray.push(landmarks[i].x);
+                flatArray.push(landmarks[i].y);
+                flatArray.push(landmarks[i].z);
+            }
+            return flatArray;
+        }
+
+        let isPredicting = false;
+        const DELAY_MS = 2500;
+
+        async function runRealInference(landmarksDetected, landmarksObj) {
+            if (isPredicting) return;
+            const now = Date.now();
+            if (now - lastPredictionTime < DELAY_MS) return;
+            if (landmarksDetected && landmarksObj) {
+                detectHandStability(landmarksObj);
+            } else {
+                previousLandmarks = null;
+                stabilityCounter = 0;
+            }
+            isPredicting = true;
+            try {
+                const startTime = performance.now();
+                if (!landmarksDetected || !tfjsAbcModel || !tfjsWordModel) { isPredicting = false; return; }
+                const flatLandmarks = flattenLandmarks(landmarksObj);
+                if (currentMode === 'alphabet') {
+                    const inputTensor = tf.tensor2d([flatLandmarks], [1, 63]);
+                    const prediction = tfjsAbcModel.predict(inputTensor);
+                    const scores = prediction.dataSync();
+                    const maxConf = Math.max(...scores);
+                    const classIdx = scores.indexOf(maxConf);
+                    const predictedChar = alphabetChars[classIdx];
+                    const confPercent = (maxConf * 100).toFixed(1);
+                    if (maxConf > 0.6) {
+                        predText.innerText = predictedChar;
+                        confBar.style.width = `${confPercent}%`;
+                        confVal.innerText = confPercent;
+                        lastPredictionTime = Date.now();
+                        addToHistory(predictedChar, confPercent);
+                    }
+                    inputTensor.dispose();
+                    prediction.dispose();
+                } else if (currentMode === 'word') {
+                    sequenceBuffer.push(flatLandmarks);
+                    if (sequenceBuffer.length > SEQUENCE_LENGTH) sequenceBuffer.shift();
+                    frameCountEl.innerText = sequenceBuffer.length;
+                    if (sequenceBuffer.length % 5 === 0 && sequenceBuffer.length > 0) {
+                        const blip = document.createElement('div');
+                        blip.className = 'buf-item';
+                        blip.innerText = `t-${sequenceBuffer.length}`;
+                        bufferTrack.appendChild(blip);
+                        if (bufferTrack.children.length > 8) bufferTrack.removeChild(bufferTrack.firstChild);
+                    }
+                    if (sequenceBuffer.length === SEQUENCE_LENGTH) {
+                        const inputTensor = tf.tensor3d([sequenceBuffer], [1, SEQUENCE_LENGTH, 63]);
+                        const prediction = await tfjsWordModel.executeAsync(inputTensor);
+                        const scores = prediction.dataSync();
+                        const maxConf = Math.max(...scores);
+                        const classIdx = scores.indexOf(maxConf);
+                        const predictedWord = wordDictionary[classIdx];
+                        const confPercent = (maxConf * 100).toFixed(1);
+                        if (maxConf > 0.4) {
+                            predText.innerText = predictedWord;
+                            confBar.style.width = `${confPercent}%`;
+                            confVal.innerText = confPercent;
+                            lastPredictionTime = Date.now();
+                            addToHistory(predictedWord, confPercent);
+                        }
+                        inputTensor.dispose();
+                        prediction.dispose();
+                    } else {
+                        predText.innerText = 'Mengumpulkan...';
+                        confBar.style.width = '0%';
+                    }
+                }
+                latencyVal.innerText = Math.round(performance.now() - startTime);
+            } catch (error) {
+                console.error("Inference error:", error);
+            } finally {
+                isPredicting = false;
+            }
+        }
+
+        // ✅ PERBAIKAN: Gunakan drawConnectors & drawLandmarks dari global scope
+        const drawConnectors = window.drawConnectors;
+        const drawLandmarks = window.drawLandmarks;
+        const HAND_CONNECTIONS = window.HAND_CONNECTIONS;
+
+        const hands = new Hands({
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+        });
+
+        hands.setOptions({
+            maxNumHands: 1,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5
+        });
+
+        hands.onResults(onResults);
+
+        function onResults(results) {
+            const now = performance.now();
+            fps = Math.round(1000 / (now - lastTime));
+            lastTime = now;
+            fpsVal.innerText = fps;
+
+            canvasCtx.save();
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                // ✅ PERBAIKAN: Cek apakah drawConnectors & HAND_CONNECTIONS tersedia
+                if (drawConnectors && HAND_CONNECTIONS) {
+                    drawConnectors(canvasCtx, results.multiHandLandmarks[0], HAND_CONNECTIONS, { color: '#0f4c81', lineWidth: 3 });
+                }
+                if (drawLandmarks) {
+                    drawLandmarks(canvasCtx, results.multiHandLandmarks[0], { color: '#00bfa5', lineWidth: 1, radius: 4 });
+                }
+                runRealInference(true, results.multiHandLandmarks[0]);
+            } else {
+                runRealInference(false, null);
+            }
+            canvasCtx.restore();
+        }
+
+        function startCamera() {
+            videoElement.style.display = 'block';
+
+            // ✅ PERBAIKAN: Gunakan navigator.mediaDevices langsung untuk kontrol lebih baik
+            const constraints = {
+                video: {
+                    width: { ideal: 640 },
+                    height: { ideal: 480 },
+                    facingMode: 'user'
+                }
+            };
+
+            navigator.mediaDevices.getUserMedia(constraints)
+                .then((stream) => {
+                    videoElement.srcObject = stream;
+                    videoElement.play();
+                    isCameraActive = true;
+                    camStatusTxt.innerText = "KAMERA AKTIF";
+                    mediapipeStatus.innerHTML = '<span class="status-dot dot-active"></span> TERHUBUNG';
+                    btnRestartCam.classList.remove('show');
+
+                    videoElement.addEventListener('loadedmetadata', () => {
+                        canvasElement.width = videoElement.videoWidth || 640;
+                        canvasElement.height = videoElement.videoHeight || 480;
+                    });
+
+                    // Fallback canvas size
+                    setTimeout(() => {
+                        if (canvasElement.width === 0 || canvasElement.height === 0) {
+                            canvasElement.width = 640;
+                            canvasElement.height = 480;
+                        }
+                    }, 1000);
+
+                    // Setup camera instance untuk MediaPipe
+                    cameraInstance = new Camera(videoElement, {
+                        onFrame: async () => {
+                            if (videoElement.readyState >= 2) {
+                                await hands.send({ image: videoElement });
+                            }
+                        },
+                        width: 640,
+                        height: 480
+                    });
+
+                    return cameraInstance.start();
+                })
+                .catch(err => {
+                    console.error("Kesalahan Kamera: ", err);
+                    isCameraActive = false;
+                    camStatusTxt.innerText = "KAMERA GAGAL - Coba restart";
+                    mediapipeStatus.innerHTML = '<span class="status-dot dot-warn"></span> GAGAL';
+                    btnRestartCam.classList.add('show');
+                });
+        }
+
+        function restartCamera() {
+            console.log("Merestart kamera...");
+            if (cameraInstance) {
+                cameraInstance.stop();
+            }
+            // Stop all tracks
+            if (videoElement.srcObject) {
+                videoElement.srcObject.getTracks().forEach(track => track.stop());
+                videoElement.srcObject = null;
+            }
+            camStatusTxt.innerText = "MERESTART...";
+            mediapipeStatus.innerHTML = '<span class="status-dot dot-idle"></span> MENUNGGU';
+            btnRestartCam.classList.remove('show');
+
+            setTimeout(() => {
+                startCamera();
+            }, 1000);
+        }
+
+        async function runSimulation() {
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML = '';
+            const lastGesture = translationHistory.length > 0 ? translationHistory[translationHistory.length - 1].text : 'Halo, permisi';
+            const msg1 = document.createElement('div');
+            msg1.className = 'chat-msg msg-deaf';
+            msg1.innerHTML = '<span class="chat-label">👋 Pengguna (Isyarat)</span>' + lastGesture;
+            chatBox.appendChild(msg1);
+            await new Promise(r => setTimeout(r, 1500));
+            const msg2 = document.createElement('div');
+            msg2.className = 'chat-msg msg-agent';
+            msg2.innerHTML = '<span class="chat-label">🎙️ Petugas Frontdesk</span>Selamat datang! Ada yang bisa saya bantu?';
+            chatBox.appendChild(msg2);
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'r' || e.key === 'R') {
+                if (!e.target.closest('input') && !e.target.closest('textarea')) resetHistory();
+            }
+        });
+
+        // Handle page visibility
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && !isCameraActive) {
+                restartCamera();
+            }
+        });
+
+        // Start everything
+        loadAiModels();
+        startCamera();
+        setTimeout(runSimulation, 3000);
+    </script>
+</body>
+</html>

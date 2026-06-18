@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>403 • Akses Ditolak</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- CDN Alternatif 1: jsDelivr -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.2/css/all.min.css">
+
+    <!-- CDN Alternatif 2: Bootstrap CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
+        body {
+            background: linear-gradient(135deg, #0a192f 0%, #1a3555 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(12px);
+            border-radius: 30px;
+            padding: 50px 40px;
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .card .icon { font-size: 5rem; color: #e53935; margin-bottom: 16px; }
+        .card h1 { font-size: 2.2rem; font-weight: 800; color: #0f4c81; }
+        .card .sub { color: #555; font-size: 1.1rem; margin: 12px 0 28px; }
+        .card .btn-home {
+            display: inline-block;
+            background: #00bfa5;
+            color: white;
+            padding: 12px 32px;
+            border-radius: 30px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.3s, transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0,191,165,0.3);
+        }
+        .card .btn-home:hover { background: #00a891; transform: translateY(-2px); }
+        .card .btn-home i { margin-right: 8px; }
+        .card .keterangan {
+            margin-top: 24px;
+            font-size: 0.85rem;
+            color: #888;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        .card .keterangan a { color: #1e88e5; text-decoration: none; }
+        .card .keterangan a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon"><i class="fa-solid fa-lock"></i></div>
+        <h1>Akses Ditolak</h1>
+        <div class="sub">Anda tidak memiliki izin untuk melihat halaman ini.</div>
+        <a href="index.html" class="btn-home"><i class="fa-regular fa-house"></i> Kembali ke Beranda</a>
+        <div class="keterangan">
+            <i class="fa-regular fa-circle-info"></i> Jika Anda petugas, silakan <a href="login.html">login</a> terlebih dahulu.
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISYARA Frontdesk • Transkrip Ucapan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #f5f7fa;
+            --surface: #ffffff;
+            --primary: #0f4c81;
+            --primary-light: #e8f0fe;
+            --accent: #00bfa5;
+            --text: #1a1f36;
+            --text-secondary: #5b616e;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow: 0 4px 12px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.08);
+            --radius: 16px;
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Navigation */
+        nav {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo i {
+            color: var(--accent);
+            font-size: 1.5rem;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-nav {
+            padding: 8px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+        }
+
+        .btn-nav:hover {
+            background: var(--primary-light);
+            border-color: var(--primary);
+        }
+
+        .btn-nav.accent {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .btn-nav.accent:hover {
+            background: #00a891;
+            border-color: #00a891;
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 30px 5% 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Header */
+        .page-header {
+            text-align: center;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-top: 4px;
+        }
+
+        /* Main Card - Input & Output Focus */
+        .main-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        /* Microphone Button */
+        .mic-container {
+            position: relative;
+        }
+
+        .mic-btn {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            color: var(--primary);
+            font-size: 2.2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .mic-btn:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .mic-btn.listening {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+            animation: micPulse 1.8s infinite;
+            box-shadow: 0 0 0 0 rgba(0, 191, 165, 0.4);
+        }
+
+        .mic-btn.paused {
+            background: #fff;
+            color: var(--warning);
+            border-color: var(--warning);
+            animation: none;
+            box-shadow: var(--shadow);
+        }
+
+        @keyframes micPulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 191, 165, 0.4); }
+            70% { box-shadow: 0 0 0 18px rgba(0, 191, 165, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 191, 165, 0); }
+        }
+
+        .mic-label {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        /* Waveform */
+        .waveform {
+            display: flex;
+            gap: 4px;
+            height: 32px;
+            align-items: center;
+            opacity: 0.3;
+            transition: opacity 0.3s;
+        }
+
+        .waveform.active {
+            opacity: 1;
+        }
+
+        .bar {
+            width: 3px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 3px;
+        }
+
+        .waveform.active .bar {
+            animation: sound 0.5s alternate infinite ease-in-out;
+        }
+
+        .waveform.paused .bar {
+            animation: none;
+            height: 6px;
+            background: var(--warning);
+        }
+
+        .bar:nth-child(1) { animation-delay: 0.0s; }
+        .bar:nth-child(2) { animation-delay: 0.1s; }
+        .bar:nth-child(3) { animation-delay: 0.2s; }
+        .bar:nth-child(4) { animation-delay: 0.3s; }
+        .bar:nth-child(5) { animation-delay: 0.4s; }
+        .bar:nth-child(6) { animation-delay: 0.1s; }
+        .bar:nth-child(7) { animation-delay: 0.2s; }
+
+        @keyframes sound {
+            0% { height: 6px; }
+            100% { height: 28px; }
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-control {
+            padding: 12px 32px;
+            border-radius: 30px;
+            border: none;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-play {
+            background: var(--success);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-play:hover {
+            background: #059669;
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-play.pause-mode {
+            background: #fff;
+            color: var(--warning);
+            border: 2px solid var(--warning);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+        }
+
+        .btn-play.pause-mode:hover {
+            background: #fffbeb;
+            box-shadow: 0 6px 18px rgba(245, 158, 11, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-reset {
+            background: #fff;
+            color: var(--text-secondary);
+            border: 1.5px solid var(--border);
+        }
+
+        .btn-reset:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+
+        /* Transcript Output */
+        .transcript-box {
+            width: 100%;
+            background: #f9fafb;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 140px;
+            font-size: 1.15rem;
+            line-height: 1.7;
+            color: var(--text);
+            overflow-y: auto;
+            position: relative;
+            text-align: left;
+        }
+
+        .placeholder-text {
+            color: #9ca3af;
+            font-style: italic;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            pointer-events: none;
+        }
+
+        .interim-text {
+            color: var(--accent);
+            opacity: 0.7;
+        }
+
+        /* Bottom Row: Status + Simulation */
+        .bottom-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .info-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .info-card h3 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            padding: 6px 0;
+        }
+
+        .status-label {
+            color: var(--text-secondary);
+        }
+
+        .status-value {
+            font-weight: 600;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .dot-idle {
+            background: #d1d5db;
+        }
+        .dot-active {
+            background: var(--success);
+            box-shadow: 0 0 6px var(--success);
+        }
+        .dot-paused {
+            background: var(--warning);
+            box-shadow: 0 0 6px var(--warning);
+        }
+
+        /* Simulation mini */
+        .simulation-chat {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .chat-msg {
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            max-width: 92%;
+            animation: slideIn 0.25s ease-out forwards;
+            opacity: 0;
+            transform: translateX(10px);
+        }
+
+        .msg-petugas {
+            background: #f0f4ff;
+            border: 1px solid #dbeafe;
+            align-self: flex-start;
+            border-bottom-left-radius: 0;
+            color: var(--text);
+        }
+
+        .msg-system {
+            background: #f0fdfa;
+            border: 1px solid #ccfbf1;
+            align-self: flex-end;
+            border-bottom-right-radius: 0;
+            color: #0f766e;
+            font-family: monospace;
+            font-size: 0.75rem;
+        }
+
+        .chat-label {
+            font-size: 0.65rem;
+            opacity: 0.6;
+            display: block;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-sim {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 500;
+            border: none;
+            background: none;
+            padding: 0;
+        }
+
+        .btn-sim:hover {
+            text-decoration: underline;
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 700px) {
+            .bottom-row {
+                grid-template-columns: 1fr;
+            }
+            .page-header h1 {
+                font-size: 1.6rem;
+            }
+            nav {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .btn-control {
+                padding: 10px 24px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="logo">
+            <i class="fa-solid fa-microphone-lines"></i> ISYARA Frontdesk
+        </a>
+        <div class="nav-buttons">
+            <a href="index.html" class="btn-nav"><i class="fa-solid fa-arrow-left"></i> Beranda</a>
+            <a href="bisindo.html" class="btn-nav accent"><i class="fa-solid fa-video"></i> Penerjemah Isyarat</a>
+        </div>
+    </nav>
+
+    <main>
+        <div class="page-header">
+            <h1>Transkrip Ucapan Petugas</h1>
+            <p>Ucapan petugas ditampilkan sebagai teks besar di layar untuk pengguna Tuli.</p>
+        </div>
+
+        <!-- MAIN INPUT/OUTPUT CARD -->
+        <div class="main-card">
+            <div class="mic-container">
+                <div class="mic-btn" id="micIcon" onclick="togglePlayPause()">
+                    <i class="fa-solid fa-play" id="micIconInner"></i>
+                </div>
+                <div class="mic-label" id="micLabel">Tekan Play untuk mulai</div>
+            </div>
+
+            <div class="waveform" id="waveform">
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+            </div>
+
+            <div class="controls">
+                <button class="btn-control btn-play" id="btnPlayPause" onclick="togglePlayPause()">
+                    <i class="fa-solid fa-play" id="btnPlayPauseIcon"></i>
+                    <span id="btnPlayPauseText">Play</span>
+                </button>
+                <button class="btn-control btn-reset" onclick="resetTranscript()">
+                    <i class="fa-solid fa-rotate-right"></i> Reset
+                </button>
+            </div>
+
+            <div class="transcript-box" id="transcriptBox">
+                <div class="placeholder-text" id="placeholderText">Teks transkripsi akan muncul di sini...</div>
+                <span id="finalText"></span>
+                <span id="interimText" class="interim-text"></span>
+            </div>
+        </div>
+
+        <!-- BOTTOM ROW: STATUS + SIMULATION -->
+        <div class="bottom-row">
+            <div class="info-card">
+                <h3><i class="fa-solid fa-gauge-high"></i> Status Sistem</h3>
+                <div class="status-row">
+                    <span class="status-label">Mesin AI</span>
+                    <span class="status-value" id="engineText">
+                        <span class="status-dot dot-idle" id="engineDot"></span> SIAP
+                    </span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">Latensi</span>
+                    <span class="status-value" id="latencyVal">-- ms</span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">Akurasi</span>
+                    <span class="status-value" id="confidenceVal">0.0%</span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">Bahasa</span>
+                    <span class="status-value">Indonesia</span>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3><i class="fa-solid fa-desktop"></i> Simulasi Loket</h3>
+                <div class="simulation-chat" id="chatBox"></div>
+                <button class="btn-sim" onclick="runSimulation()">
+                    <i class="fa-solid fa-rotate-right"></i> Ulangi simulasi
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
+        let isListening = false;
+        let isPaused = false;
+
+        // DOM Elements
+        const micIcon = document.getElementById('micIcon');
+        const micIconInner = document.getElementById('micIconInner');
+        const micLabel = document.getElementById('micLabel');
+        const waveform = document.getElementById('waveform');
+        const btnPlayPause = document.getElementById('btnPlayPause');
+        const btnPlayPauseIcon = document.getElementById('btnPlayPauseIcon');
+        const btnPlayPauseText = document.getElementById('btnPlayPauseText');
+        const engineDot = document.getElementById('engineDot');
+        const engineText = document.getElementById('engineText');
+        const latencyVal = document.getElementById('latencyVal');
+        const confidenceVal = document.getElementById('confidenceVal');
+        const transcriptBox = document.getElementById('transcriptBox');
+        const finalTextSpan = document.getElementById('finalText');
+        const interimTextSpan = document.getElementById('interimText');
+        const placeholderText = document.getElementById('placeholderText');
+
+        let finalTranscript = '';
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'id-ID';
+
+            recognition.onstart = function() {
+                isListening = true;
+                isPaused = false;
+                updateUIState('listening');
+            };
+
+            recognition.onresult = function(event) {
+                let interimTranscript = '';
+                let latestConfidence = 0;
+                placeholderText.style.display = 'none';
+
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript + '. ';
+                        latestConfidence = event.results[i][0].confidence;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                        latestConfidence = event.results[i][0].confidence || 0.85;
+                    }
+                }
+
+                finalTextSpan.innerHTML = finalTranscript;
+                interimTextSpan.innerHTML = interimTranscript;
+                confidenceVal.innerText = (latestConfidence * 100).toFixed(1) + '%';
+                latencyVal.innerText = Math.floor(Math.random() * (100 - 30 + 1) + 30) + ' ms';
+                transcriptBox.scrollTop = transcriptBox.scrollHeight;
+            };
+
+            recognition.onerror = function(event) {
+                if (event.error !== 'no-speech') {
+                    pauseListening();
+                }
+            };
+
+            recognition.onend = function() {
+                if (isListening && !isPaused) {
+                    // Auto restart if not paused
+                    recognition.start();
+                } else if (isPaused) {
+                    updateUIState('paused');
+                } else {
+                    updateUIState('idle');
+                }
+            };
+        } else {
+            placeholderText.innerText = "Browser tidak mendukung. Gunakan Google Chrome.";
+            btnPlayPause.disabled = true;
+            btnPlayPause.style.opacity = '0.5';
+            btnPlayPause.style.cursor = 'not-allowed';
+        }
+
+        function togglePlayPause() {
+            if (!recognition) return;
+
+            if (!isListening && !isPaused) {
+                // Start listening (PLAY)
+                startListening();
+            } else if (isListening && !isPaused) {
+                // Pause listening (PAUSE)
+                pauseListening();
+            } else if (isPaused) {
+                // Resume listening (RESUME)
+                resumeListening();
+            }
+        }
+
+        function startListening() {
+            if (recognition) {
+                finalTranscript = '';
+                finalTextSpan.innerHTML = '';
+                interimTextSpan.innerHTML = '';
+                placeholderText.style.display = 'block';
+                recognition.start();
+            }
+        }
+
+        function pauseListening() {
+            if (recognition && isListening) {
+                isPaused = true;
+                isListening = false;
+                recognition.stop();
+                updateUIState('paused');
+            }
+        }
+
+        function resumeListening() {
+            if (recognition && isPaused) {
+                isPaused = false;
+                recognition.start();
+            }
+        }
+
+        function resetTranscript() {
+            finalTranscript = '';
+            finalTextSpan.innerHTML = '';
+            interimTextSpan.innerHTML = '';
+            placeholderText.style.display = 'block';
+            confidenceVal.innerText = '0.0%';
+            transcriptBox.scrollTop = 0;
+        }
+
+        function updateUIState(state) {
+            // Remove all state classes first
+            micIcon.classList.remove('listening', 'paused');
+            waveform.classList.remove('active', 'paused');
+            btnPlayPause.classList.remove('pause-mode');
+            engineDot.classList.remove('dot-active', 'dot-paused');
+            engineDot.classList.add('dot-idle');
+
+            if (state === 'listening') {
+                // Active listening
+                micIcon.classList.add('listening');
+                micIconInner.className = 'fa-solid fa-microphone';
+                micLabel.innerText = 'Mendengarkan...';
+                waveform.classList.add('active');
+                btnPlayPause.classList.remove('pause-mode');
+                btnPlayPauseIcon.className = 'fa-solid fa-pause';
+                btnPlayPauseText.innerText = 'Pause';
+                engineDot.classList.remove('dot-idle');
+                engineDot.classList.add('dot-active');
+                engineText.innerHTML = '<span class="status-dot dot-active"></span> AKTIF';
+                latencyVal.innerText = '38 ms';
+
+            } else if (state === 'paused') {
+                // Paused state
+                micIcon.classList.add('paused');
+                micIconInner.className = 'fa-solid fa-pause';
+                micLabel.innerText = 'Jeda...';
+                waveform.classList.add('paused');
+                btnPlayPause.classList.add('pause-mode');
+                btnPlayPauseIcon.className = 'fa-solid fa-play';
+                btnPlayPauseText.innerText = 'Lanjutkan';
+                engineDot.classList.remove('dot-idle');
+                engineDot.classList.add('dot-paused');
+                engineText.innerHTML = '<span class="status-dot dot-paused"></span> JEDA';
+                latencyVal.innerText = '-- ms';
+
+            } else {
+                // Idle state
+                micIconInner.className = 'fa-solid fa-play';
+                micLabel.innerText = 'Tekan Play untuk mulai';
+                waveform.classList.remove('active', 'paused');
+                btnPlayPause.classList.remove('pause-mode');
+                btnPlayPauseIcon.className = 'fa-solid fa-play';
+                btnPlayPauseText.innerText = 'Play';
+                engineDot.classList.add('dot-idle');
+                engineDot.classList.remove('dot-active', 'dot-paused');
+                engineText.innerHTML = '<span class="status-dot dot-idle"></span> SIAP';
+                latencyVal.innerText = '-- ms';
+                confidenceVal.innerText = '0.0%';
+            }
+        }
+
+        // Simulation
+        const mockConvo = [
+            { sender: 'petugas', text: "Selamat pagi, ada yang bisa saya bantu?" },
+            { sender: 'system', text: "[TRANSKRIP OTOMATIS]" },
+            { sender: 'petugas', text: "Silakan isi formulir di meja sebelah." },
+            { sender: 'system', text: "[AKURASI: 98%]" }
+        ];
+
+        async function runSimulation() {
+            const chatBox = document.getElementById('chatBox');
+            chatBox.innerHTML = '';
+            for (let i = 0; i < mockConvo.length; i++) {
+                await new Promise(r => setTimeout(r, 1200));
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `chat-msg ${mockConvo[i].sender === 'petugas' ? 'msg-petugas' : 'msg-system'}`;
+                const label = mockConvo[i].sender === 'petugas' ? '🎙️ Petugas' : '⚡ Sistem';
+                msgDiv.innerHTML = `<span class="chat-label">${label}</span>${mockConvo[i].text}`;
+                chatBox.appendChild(msgDiv);
+            }
+        }
+
+        // Keyboard shortcut: Space bar to toggle play/pause
+        document.addEventListener('keydown', function(e) {
+            if (e.code === 'Space' && !e.target.closest('input') && !e.target.closest('textarea')) {
+                e.preventDefault();
+                togglePlayPause();
+            }
+        });
+
+        setTimeout(runSimulation, 800);
+    </script>
+</body>
+</html>
