@@ -16,8 +16,45 @@ class ISYARASpeechToTextTests:
         self.base_url = base_url
         self.results = []
 
+        # Konfigurasi delay
+        self.ACTION_DELAY = 3          # delay antar aksi normal
+        self.LONG_ACTION_DELAY = 10    # delay untuk simulasi pemrosesan suara (deteksi, transkripsi)
+
     def close(self):
         self.driver.quit()
+
+    def wait_for_alert(self, timeout=5, accept=True):
+        """Menangani pop-up alert jika muncul"""
+        try:
+            alert = WebDriverWait(self.driver, timeout).until(EC.alert_is_present())
+            if accept:
+                alert.accept()
+                print("   ✅ Alert diterima")
+            else:
+                alert.dismiss()
+                print("   ❌ Alert dibatalkan")
+            time.sleep(self.ACTION_DELAY)
+            return True
+        except:
+            return False
+
+    def check_overlay_presence(self):
+        """
+        Memeriksa apakah overlay (loading/spinner) muncul pada halaman speechtotext.html.
+        Overlay ini menandakan tahap pemrosesan audio/transkripsi.
+        """
+        try:
+            # Cari elemen overlay (sesuaikan selector dengan implementasi halaman)
+            overlay = self.driver.find_element(By.CSS_SELECTOR, ".overlay, .loading, #loadingOverlay")
+            if overlay.is_displayed():
+                print("   📌 Overlay terdeteksi (tahap pemrosesan audio/transkripsi)")
+                return True
+            else:
+                print("   ⚠️ Overlay ada tetapi tidak terlihat")
+                return False
+        except:
+            print("   ℹ️ Overlay tidak ditemukan (mungkin sudah selesai atau tidak digunakan)")
+            return False
 
     def login_as_admin(self):
         self.driver.get(f"{self.base_url}/login.html")
@@ -25,26 +62,42 @@ class ISYARASpeechToTextTests:
         self.driver.find_element(By.ID, "username").send_keys("superadmin")
         self.driver.find_element(By.ID, "password").send_keys("admin123")
         self.driver.find_element(By.CSS_SELECTOR, ".btn-login").click()
+        time.sleep(self.ACTION_DELAY)
+
+        # Cek kemungkinan alert setelah login
+        self.wait_for_alert(timeout=2, accept=True)
+
         self.wait.until(EC.presence_of_element_located((By.CLASS_NAME, "dashboard-wrap")))
+        time.sleep(self.ACTION_DELAY)
 
     def go_to_dashboard(self):
         self.driver.get(f"{self.base_url}/dashboard.html")
         self.wait.until(EC.presence_of_element_located((By.CLASS_NAME, "dashboard-wrap")))
+        time.sleep(self.ACTION_DELAY)
 
     def switch_tab(self, tab_id):
         tab_btn = self.wait.until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, f'[data-tab="{tab_id}"]'))
         )
         tab_btn.click()
-        time.sleep(0.5)
+        time.sleep(self.ACTION_DELAY)
 
     def get_table_rows(self, table_body_id):
         tbody = self.driver.find_element(By.ID, table_body_id)
         return tbody.find_elements(By.TAG_NAME, "tr")
 
     def inject_event_from_page(self, page_url, event_data):
+        """
+        Buka halaman layanan dan inject event ke localStorage seolah-olah berasal dari halaman tersebut.
+        Selama membuka halaman, akan dilakukan pengecekan overlay (tahap pemrosesan audio).
+        """
         self.driver.get(page_url)
-        time.sleep(2)
+        # Tunggu halaman siap (simulasi waktu deteksi/transkripsi - 10 detik)
+        time.sleep(self.LONG_ACTION_DELAY)
+
+        # Cek overlay (selalu ada selama proses pemrosesan)
+        self.check_overlay_presence()
+
         inject_script = f"""
             (function() {{
                 const state = JSON.parse(localStorage.getItem('isyara_dashboard_data'));
@@ -65,7 +118,7 @@ class ISYARASpeechToTextTests:
             }})();
         """
         self.driver.execute_script(inject_script)
-        time.sleep(1)
+        time.sleep(self.ACTION_DELAY)  # beri waktu untuk penyimpanan
 
     # ============================================================
     # TEST 1: Normal Flow - Transkripsi sukses
@@ -129,8 +182,10 @@ class ISYARASpeechToTextTests:
                     try:
                         eskalasi_btn = row.find_element(By.CSS_SELECTOR, ".btn-sm.warning")
                         eskalasi_btn.click()
-                        time.sleep(1)
+                        time.sleep(self.ACTION_DELAY)
                         print("   ⚡ Event Warning di-eskalasi ke Insiden")
+                        # Cek konfirmasi alert
+                        self.wait_for_alert(timeout=3, accept=True)
                     except:
                         print("   ⚠️  Tombol eskalasi tidak ditemukan")
                     break
@@ -184,8 +239,9 @@ class ISYARASpeechToTextTests:
                     try:
                         eskalasi_btn = row.find_element(By.CSS_SELECTOR, ".btn-sm.warning")
                         eskalasi_btn.click()
-                        time.sleep(1)
+                        time.sleep(self.ACTION_DELAY)
                         print("   ⚡ Event Exception di-eskalasi ke Insiden")
+                        self.wait_for_alert(timeout=3, accept=True)
                     except:
                         print("   ⚠️  Tombol eskalasi tidak ditemukan")
                     break
@@ -206,14 +262,16 @@ class ISYARASpeechToTextTests:
                         try:
                             detail_btn = row.find_element(By.CSS_SELECTOR, ".btn-sm")
                             detail_btn.click()
-                            time.sleep(1)
+                            time.sleep(self.ACTION_DELAY)
                             status_select = self.wait.until(
                                 EC.presence_of_element_located((By.ID, "modalStatusSelect"))
                             )
                             status_select.send_keys("Ditangani")
                             self.driver.find_element(By.ID, "modalConfirm").click()
-                            time.sleep(1)
+                            time.sleep(self.ACTION_DELAY)
                             print("   🔧 Insiden diupdate status ke 'Ditangani' (simulasi restart NLP)")
+                            # Cek pop-up sukses
+                            self.wait_for_alert(timeout=3, accept=True)
                             break
                         except:
                             pass
@@ -249,7 +307,7 @@ class ISYARASpeechToTextTests:
             except Exception as e:
                 print(f"⚠️  Test {test.__name__} gagal dengan error: {e}")
                 self.results.append(False)
-            time.sleep(1)
+            time.sleep(self.ACTION_DELAY)  # delay antar test
 
         self.print_summary()
 
